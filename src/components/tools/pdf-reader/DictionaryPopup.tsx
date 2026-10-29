@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
-import { BookOpen, ExternalLink, Loader2, X } from 'lucide-react';
+import { BookOpen, BookmarkPlus, ExternalLink, Loader2, Pencil, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { openExternalUrl } from '@/lib/tauri-bridge';
 import { getDicioUrl, lookupWord, type DictionaryEntry } from '@/lib/dictionary';
+import { findGlossaryEntry, getGlossary, getServerGlossary, subscribeGlossary } from '@/lib/storage/glossary';
+import { GlossaryEntryForm } from './GlossaryEntryForm';
 
 export interface DictionaryAnchor {
     /** Viewport coordinates of the looked-up word */
@@ -22,7 +24,7 @@ export interface DictionaryPopupProps {
 }
 
 const POPUP_WIDTH = 360;
-const POPUP_MAX_HEIGHT = 320;
+const POPUP_MAX_HEIGHT = 420;
 const MARGIN = 8;
 
 type LookupState =
@@ -32,15 +34,31 @@ type LookupState =
     | { status: 'error' };
 
 /**
+ * Suggested text for a new glossary entry: the first Wiktionary section,
+ * without its leading syllable/gender line ("pre.clu.são, feminino").
+ */
+function suggestDefinition(state: LookupState): string {
+    if (state.status !== 'found') return '';
+    const lines = state.entry.sections[0]?.lines ?? [];
+    const withoutSyllables = /^[\p{L}.]+,/u.test(lines[0] ?? '') ? lines.slice(1) : lines;
+    return withoutSyllables.join('\n');
+}
+
+/**
  * DictionaryPopup Component
  *
- * Small floating card shown next to a double-clicked word, with its
- * Wiktionary definition and a link to the same word on Dicio.
+ * Small floating card shown next to a double-clicked word, with the user's
+ * own glossary entry (if any), its Wiktionary definition and a link to Dicio.
  */
 export function DictionaryPopup({ word, anchor, onClose }: DictionaryPopupProps) {
     const t = useTranslations('tools.pdfReader.dictionary');
+    const tGlossary = useTranslations('tools.pdfReader.glossary');
     const popupRef = useRef<HTMLDivElement>(null);
     const [state, setState] = useState<LookupState>({ status: 'loading' });
+    const [isEditing, setIsEditing] = useState(false);
+    const glossary = useSyncExternalStore(subscribeGlossary, getGlossary, getServerGlossary);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const glossaryEntry = useMemo(() => findGlossaryEntry(word), [word, glossary]);
     const [position, setPosition] = useState({ left: anchor.left, top: anchor.bottom + MARGIN });
 
     useEffect(() => {
@@ -62,7 +80,7 @@ export function DictionaryPopup({ word, anchor, onClose }: DictionaryPopupProps)
         const fitsBelow = anchor.bottom + MARGIN + height <= window.innerHeight - MARGIN;
         const top = fitsBelow ? anchor.bottom + MARGIN : Math.max(MARGIN, anchor.top - MARGIN - height);
         setPosition({ left, top });
-    }, [anchor, state]);
+    }, [anchor, state, isEditing, glossaryEntry]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -109,6 +127,35 @@ export function DictionaryPopup({ word, anchor, onClose }: DictionaryPopupProps)
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-2 text-sm leading-relaxed">
+                {isEditing ? (
+                    <GlossaryEntryForm
+                        initialTerm={glossaryEntry?.term ?? word.toLowerCase()}
+                        initialDefinition={glossaryEntry?.definition ?? suggestDefinition(state)}
+                        editingTerm={glossaryEntry?.term}
+                        onDone={() => setIsEditing(false)}
+                    />
+                ) : (
+                <>
+                {glossaryEntry && (
+                    <div className="mb-3 p-2 rounded-md bg-primary/10 border border-primary/30">
+                        <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                                {tGlossary('myGlossary')}
+                                {glossaryEntry.term.toLowerCase() !== word.toLowerCase() && ` · ${glossaryEntry.term}`}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => setIsEditing(true)}
+                                className="p-1 rounded hover:bg-primary/20 text-primary"
+                                aria-label={tGlossary('edit')}
+                                title={tGlossary('edit')}
+                            >
+                                <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                        <p className="mt-0.5 whitespace-pre-line">{glossaryEntry.definition}</p>
+                    </div>
+                )}
                 {state.status === 'loading' && (
                     <div className="flex items-center gap-2 text-[hsl(var(--color-muted-foreground))]">
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -131,23 +178,33 @@ export function DictionaryPopup({ word, anchor, onClose }: DictionaryPopupProps)
                         ))}
                     </div>
                 ))}
-            </div>
-
-            <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-[hsl(var(--color-border))]">
-                {state.status === 'found' ? (
+                {state.status === 'found' && (
                     <button
                         type="button"
                         onClick={() => openExternalUrl(state.entry.sourceUrl)}
-                        className="text-xs text-[hsl(var(--color-muted-foreground))] hover:underline"
+                        className="mt-1 text-xs text-[hsl(var(--color-muted-foreground))] hover:underline"
                     >
                         {t('source')}
                     </button>
-                ) : <span />}
-                <Button variant="primary" size="sm" className="gap-1" onClick={() => openExternalUrl(getDicioUrl(word))}>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    {t('openDicio')}
-                </Button>
+                )}
+                </>
+                )}
             </div>
+
+            {!isEditing && (
+                <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-[hsl(var(--color-border))]">
+                    {!glossaryEntry ? (
+                        <Button variant="outline" size="sm" className="gap-1" onClick={() => setIsEditing(true)}>
+                            <BookmarkPlus className="w-3.5 h-3.5" />
+                            {tGlossary('saveToGlossary')}
+                        </Button>
+                    ) : <span />}
+                    <Button variant="primary" size="sm" className="gap-1" onClick={() => openExternalUrl(getDicioUrl(word))}>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        {t('openDicio')}
+                    </Button>
+                </div>
+            )}
         </div>,
         document.body
     );

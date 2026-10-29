@@ -5,12 +5,13 @@ import { useTranslations } from 'next-intl';
 import { FileUploader } from '../FileUploader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Download, X, CopyCheck, Printer, RefreshCw, CheckCircle2, AlertCircle, Loader2, BookOpen } from 'lucide-react';
+import { Download, X, CopyCheck, Printer, RefreshCw, CheckCircle2, AlertCircle, Loader2, BookOpen, Library } from 'lucide-react';
 import { saveBlobFile, isTauri, getSystemPrinters, printPdfFile, type SystemPrinter } from '@/lib/tauri-bridge';
 import { Modal } from '@/components/ui';
 import { withBasePath } from '@/lib/utils/path';
 import { normalizeLookupWord } from '@/lib/dictionary';
 import { DictionaryPopup, type DictionaryAnchor } from './DictionaryPopup';
+import { GlossaryManager } from './GlossaryManager';
 
 export const SELECTED_PRINTER_STORAGE_KEY = 'pdfcraft-selected-printer';
 
@@ -34,6 +35,7 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
     const [copiedNotify, setCopiedNotify] = useState<string | null>(null);
     const [dictionaryEnabled, setDictionaryEnabled] = useState(true);
     const [lookup, setLookup] = useState<{ word: string; anchor: DictionaryAnchor } | null>(null);
+    const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
 
     // Native printing state
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
@@ -294,6 +296,17 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
 
     return (
         <div className={`space-y-4 ${className}`.trim()} ref={containerRef}>
+            <GlossaryManager isOpen={isGlossaryOpen} onClose={() => setIsGlossaryOpen(false)} />
+
+            {!hasFile && (
+                <div className="flex justify-end">
+                    <Button variant="outline" size="sm" className="gap-1" onClick={() => setIsGlossaryOpen(true)}>
+                        <Library className="w-4 h-4" />
+                        {tTools('pdfReader.glossary.myGlossary')}
+                    </Button>
+                </div>
+            )}
+
             {!hasFile && (
                 <FileUploader
                     accept={['application/pdf', '.pdf']}
@@ -351,6 +364,20 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
                                 >
                                     <BookOpen className={`w-3.5 h-3.5 ${dictionaryEnabled ? 'text-primary' : 'text-muted-foreground'}`} />
                                     <span className="hidden sm:inline">{tTools('pdfReader.dictionary.toggle')}</span>
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setLookup(null);
+                                        setIsGlossaryOpen(true);
+                                    }}
+                                    className="text-xs h-7 gap-1"
+                                    title={tTools('pdfReader.glossary.myGlossary')}
+                                >
+                                    <Library className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">{tTools('pdfReader.glossary.toolbar')}</span>
                                 </Button>
 
                                 <Button
