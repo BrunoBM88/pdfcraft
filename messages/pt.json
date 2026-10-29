@@ -685,7 +685,21 @@
       "successTitle": "Reconhecimento OCR concluído!",
       "successSearchablePdf": "PDF pesquisável gerado! As folhas digitalizadas são sobrepostas com texto interativo. Realce e pesquise livremente.",
       "successText": "Estruturas de texto simples extraídas com sucesso. Visualização do texto exibida abaixo.",
-      "previewTitle": "Visualização do fluxo de texto extraído"
+      "previewTitle": "Visualização do fluxo de texto extraído",
+      "formatMarkdown": "Markdown estruturado (.md)",
+      "formatJson": "JSON estruturado (.json)",
+      "enhanceContrast": "Melhoria inteligente da qualidade da imagem",
+      "enhanceContrastDesc": "Aumenta o contraste e a nitidez automaticamente em tinta fraca e digitalizações escuras",
+      "copyText": "Copiar texto reconhecido",
+      "copied": "Copiado para a área de transferência!",
+      "openInEditor": "Editar no Editor de PDF",
+      "openInEditorDesc": "Edite o texto e o layout diretamente no Editor do PDFCraft, sem precisar baixar",
+      "statsPages": "Páginas",
+      "statsWords": "Palavras",
+      "statsChars": "Caracteres",
+      "statsConfidence": "Confiança média",
+      "tabText": "Prévia do texto",
+      "tabJson": "Estrutura JSON"
     },
     "overlayPdf": {
       "uploadBaseLabel": "1. Enviar documento base (PDF base)",
@@ -1457,7 +1471,12 @@
     "conditionGateway": "Gateway condicional",
     "downloadPdf": "Baixar PDF",
     "outputCategory": "Saída e Exportação",
-    "filenameLabel": "Nome do arquivo de saída"
+    "filenameLabel": "Nome do arquivo de saída",
+    "addToWorkflowHint": "Arraste ou clique duas vezes para adicionar ao fluxo de trabalho",
+    "inputCategory": "Fontes de entrada",
+    "pdfInput": "Entrada de PDF",
+    "imageInput": "Entrada de imagem",
+    "fileInput": "Entrada de arquivo"
   },
   "tools": {
     "search": {
@@ -1620,7 +1639,9 @@
       "pageRange": "Intervalo de Páginas",
       "pageRangePlaceholder": "ex: 1-5, 8, 10-12",
       "extractButton": "Extrair páginas",
-      "successMessage": "Páginas extraídas com sucesso! Clique no botão de download para salvar seu arquivo."
+      "successMessage": "Páginas extraídas com sucesso! Clique no botão de download para salvar seu arquivo.",
+      "selectOdd": "Ímpares",
+      "selectEven": "Pares"
     },
     "posterizePdf": {
       "uploadLabel": "Carregar arquivo PDF",
@@ -1680,7 +1701,29 @@
       "errorParse": "Falha ao analisar o certificado",
       "errorPEM": "Falha ao ler o arquivo PEM.",
       "errorType": "Selecione um arquivo .pfx, .p12 ou .pem.",
-      "errorImgType": "Selecione uma imagem PNG ou JPEG."
+      "errorImgType": "Selecione uma imagem PNG ou JPEG.",
+      "modeFile": "Arquivo de certificado",
+      "modeRemote": "Serviço de assinatura remota",
+      "remoteServiceUrlLabel": "URL do serviço de assinatura",
+      "remoteServiceUrlHint": "Endereço da API CSC fornecido pelo seu prestador de serviço de confiança. Funciona com qualquer prestador que implemente a API do Cloud Signature Consortium (v1 ou v2), desde que permita requisições deste site.",
+      "remoteConnectButton": "Conectar",
+      "remoteUsernameLabel": "Usuário",
+      "remotePasswordLabel": "Senha",
+      "remoteSignInButton": "Entrar",
+      "remoteClientIdLabel": "ID do cliente OAuth",
+      "remoteOAuthButton": "Entrar pelo prestador",
+      "remoteRedirectHint": "Cadastre esta URI de redirecionamento no seu prestador:",
+      "remoteCredentialLabel": "Certificado de assinatura",
+      "remotePinLabel": "PIN",
+      "remoteOtpLabel": "Código de uso único",
+      "remoteOptional": "opcional",
+      "remoteSendOtp": "Enviar código",
+      "remoteResendOtp": "Reenviar código",
+      "remoteOAuthCredentialHint": "Você confirmará a assinatura na página do seu prestador ao clicar em Assinar PDF.",
+      "remoteImplicitHint": "Seu prestador confirma esta assinatura no próprio ambiente dele (por exemplo, no aplicativo do celular).",
+      "remotePrivacyNote": "Seu PDF permanece no seu navegador. Apenas um hash de 32 bytes dos dados da assinatura é enviado ao serviço de assinatura.",
+      "remoteNoCredentials": "Nenhum certificado de assinatura foi encontrado para esta conta.",
+      "remoteSigningProgress": "Aguardando o serviço de assinatura..."
     },
     "validateSign": {
       "uploadLabel": "Carregar PDF assinado",
@@ -1786,7 +1829,12 @@
       "saveButton": "Salvar metadados",
       "editAnother": "Editar outro PDF",
       "modificationNote": "A data de modificação será atualizada automaticamente quando você salvar.",
-      "successMessage": "Metadados atualizados com sucesso! Clique no botão de download para salvar seu arquivo."
+      "successMessage": "Metadados atualizados com sucesso! Clique no botão de download para salvar seu arquivo.",
+      "datesSection": "Datas do documento",
+      "creationDate": "Data de criação",
+      "creationDateHelp": "Data em que o documento foi criado originalmente.",
+      "modificationDate": "Data de modificação",
+      "modificationDateHelp": "Deixe em branco para usar automaticamente a data e hora atuais ao salvar."
     },
     "editPdf": {
       "uploadLabel": "Carregar PDF para editar",
@@ -1819,7 +1867,15 @@
         "fontSize": "Tamanho da fonte",
         "inkColor": "Cor da tinta",
         "inkThickness": "Espessura da tinta"
-      }
+      },
+      "textHistory": "Histórico de alterações de texto",
+      "textUndo": "Desfazer texto",
+      "textRedo": "Refazer texto",
+      "textUndoApplied": "A última alteração de texto foi desfeita.",
+      "textRedoApplied": "A alteração de texto foi refeita.",
+      "overflowAppliedWarning": "O texto substituto ultrapassa a área original. Confira o resultado visualmente antes de exportar.",
+      "fallbackFontWarning": "Não foi possível reutilizar a fonte original e uma fonte alternativa foi usada. Confira os caracteres e o espaçamento.",
+      "signatureInvalidatedWarning": "Este PDF continha assinaturas digitais. Editar o conteúdo invalida as assinaturas existentes."
     },
     "imageToPdf": {
       "uploadLabel": "Carregar imagens",
@@ -2516,7 +2572,14 @@
       "bold": "Audacioso",
       "italic": "itálico",
       "boldItalic": "Negrito e Itálico",
-      "setToCurrentPage": "Definir para a página atual"
+      "setToCurrentPage": "Definir para a página atual",
+      "removeAll": "Remover todos",
+      "removeAllConfirm": "Remover todos os marcadores? Você ainda pode salvar para baixar um PDF sem marcadores.",
+      "removedAllHint": "Todos os marcadores foram removidos. Salve para baixar um PDF sem marcadores.",
+      "removeSelected": "Remover selecionados ({count})",
+      "removeSelectedConfirm": "Remover {count, plural, one {# marcador selecionado} other {# marcadores selecionados}}? Os marcadores filhos também serão removidos.",
+      "selectForRemoval": "Selecionar \"{title}\"",
+      "selectHint": "Marque as caixas para remover vários marcadores de uma vez. Shift+clique seleciona um intervalo."
     },
     "pageNumbers": {
       "uploadLabel": "Carregar arquivo PDF",
@@ -2607,9 +2670,9 @@
       "previewTitle": "Visualizar",
       "previewNote": "Mostrando apenas a primeira página para melhor desempenho",
       "previewGenerating": "Gerando visualização...",
-      "flattenTitle": "Flatten Watermark",
-      "flattenDescription": "Rasterize pages into tamper-resistant images so watermarks cannot be removed or extracted",
-      "dragHint": "Drag watermark directly on preview or drag corners to resize",
+      "flattenTitle": "Achatar marca d'água",
+      "flattenDescription": "Converte as páginas em imagens à prova de adulteração, para que a marca d'água não possa ser removida nem extraída",
+      "dragHint": "Arraste a marca d'água direto na prévia ou arraste os cantos para redimensionar",
       "posTop": "Top",
       "posBottom": "Bottom",
       "posLeft": "Left",

@@ -6,7 +6,7 @@
 export const locales = ['en', 'ja', 'ko', 'es', 'fr', 'de', 'zh', 'zh-TW', 'pt', 'ar', 'he', 'it', 'id', 'vi', 'ro', 'pl', 'cs', 'hi'] as const;
 export type Locale = (typeof locales)[number];
 
-export const defaultLocale: Locale = 'en';
+export const defaultLocale: Locale = 'pt';
 
 export const localeConfig: Record<Locale, {
   name: string;
@@ -22,7 +22,7 @@ export const localeConfig: Record<Locale, {
   de: { name: 'German', nativeName: 'Deutsch', direction: 'ltr', dateFormat: 'DD.MM.YYYY' },
   zh: { name: 'Chinese (Simplified)', nativeName: '简体中文', direction: 'ltr', dateFormat: 'YYYY-MM-DD' },
   'zh-TW': { name: 'Chinese (Traditional)', nativeName: '繁體中文', direction: 'ltr', dateFormat: 'YYYY/MM/DD' },
-  pt: { name: 'Portuguese', nativeName: 'Português', direction: 'ltr', dateFormat: 'DD/MM/YYYY' },
+  pt: { name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)', direction: 'ltr', dateFormat: 'DD/MM/YYYY' },
   ar: { name: 'Arabic', nativeName: 'العربية', direction: 'rtl', dateFormat: 'DD/MM/YYYY' },
   he: { name: 'Hebrew', nativeName: 'עברית', direction: 'rtl', dateFormat: 'DD/MM/YYYY' },
   it: { name: 'Italian', nativeName: 'Italiano', direction: 'ltr', dateFormat: 'DD/MM/YYYY' },

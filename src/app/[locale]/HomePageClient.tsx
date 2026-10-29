@@ -128,9 +128,9 @@ export default function HomePageClient({ locale, localizedToolContent }: HomePag
                     className="h-11 px-7 text-base shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 gap-2"
                   >
                     <Sparkles className="h-4 w-4" aria-hidden="true" />
-                    <span>{locale === 'zh' ? '进入 Studio 工作台' : 'Open PDF Studio'}</span>
+                    <span>{locale === 'zh' ? '进入 Studio 工作台' : locale === 'pt' ? 'Abrir o PDF Studio' : 'Open PDF Studio'}</span>
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/20 text-white leading-none">
-                      NEW
+                      {locale === 'pt' ? 'NOVO' : 'NEW'}
                     </span>
                   </Button>
                 </Link>
