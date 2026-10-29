@@ -7,7 +7,8 @@ import {
   UpdateSettings,
 } from '@/types/updater';
 
-export const GITHUB_REPO = 'PDFCraftTool/pdfcraft';
+// Fork: check this repository's releases, so updates never replace it with the upstream build
+export const GITHUB_REPO = 'BrunoBM88/pdfcraft';
 export const DEFAULT_CURRENT_VERSION =
   process.env.NEXT_PUBLIC_APP_VERSION || '0.1.0';
 
