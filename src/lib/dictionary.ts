@@ -73,7 +73,8 @@ function parsePortugueseSection(extract: string): DictionarySection[] {
 
   const sections: DictionarySection[] = [];
   let current: DictionarySection | null = null;
-  let skipping = false;
+  // Heading level of the skipped section; its subsections (e.g. "Brasil" under "Pronúncia") are skipped too
+  let skippedLevel = 0;
 
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i];
@@ -82,8 +83,10 @@ function parsePortugueseSection(extract: string): DictionarySection[] {
 
     const heading = line.match(/^(={2,})\s*(.+?)\s*\1$/);
     if (heading) {
-      skipping = SKIPPED_SECTIONS.has(heading[2].toLowerCase());
-      if (!skipping) {
+      const level = heading[1].length;
+      if (skippedLevel && level > skippedLevel) continue;
+      skippedLevel = SKIPPED_SECTIONS.has(heading[2].toLowerCase()) ? level : 0;
+      if (!skippedLevel) {
         current = { heading: heading[2], lines: [] };
         sections.push(current);
       }
@@ -91,7 +94,7 @@ function parsePortugueseSection(extract: string): DictionarySection[] {
     }
 
     // Skip blank lines and expressions listed without a definition ("preclusão temporal:")
-    if (skipping || !current || !line || line.endsWith(':')) continue;
+    if (skippedLevel || !current || !line || line.endsWith(':')) continue;
     current.lines.push(line);
   }
 

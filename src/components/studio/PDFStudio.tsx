@@ -30,6 +30,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { StudioLeftRail } from './StudioLeftRail';
 import { StudioToolDrawer } from './StudioToolDrawer';
+import { DictionaryPopup } from '@/components/tools/pdf-reader/DictionaryPopup';
+import { useViewerDictionary } from '@/components/tools/pdf-reader/useViewerDictionary';
 import {
   executeStudioOperation,
   executeStudioExport,
@@ -534,8 +536,14 @@ export const PDFStudio: React.FC<PDFStudioProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleUndo, handleRedo, handleExport, handlePrint]);
 
+  // Double-click a word in the viewer to look it up in the dictionary
+  const { lookup, closeLookup } = useViewerDictionary(iframeRef, true, pdfUrl);
+
   return (
     <div className={`h-screen flex flex-col bg-[hsl(var(--color-background))] select-none ${className}`.trim()}>
+      {lookup && (
+        <DictionaryPopup word={lookup.word} anchor={lookup.anchor} onClose={closeLookup} />
+      )}
       {/* Studio Header (Compact Toolbar - 52px) */}
       <header className="h-[52px] flex-shrink-0 border-b border-[hsl(var(--color-border))] bg-[hsl(var(--color-card)/0.9)] backdrop-blur-md px-4 flex items-center justify-between z-30 relative">
         {/* Left: Brand & File Info */}

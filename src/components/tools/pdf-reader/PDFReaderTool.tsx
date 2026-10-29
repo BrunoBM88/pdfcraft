@@ -9,9 +9,9 @@ import { Download, X, CopyCheck, Printer, RefreshCw, CheckCircle2, AlertCircle, 
 import { saveBlobFile, isTauri, getSystemPrinters, printPdfFile, type SystemPrinter } from '@/lib/tauri-bridge';
 import { Modal } from '@/components/ui';
 import { withBasePath } from '@/lib/utils/path';
-import { normalizeLookupWord } from '@/lib/dictionary';
-import { DictionaryPopup, type DictionaryAnchor } from './DictionaryPopup';
+import { DictionaryPopup } from './DictionaryPopup';
 import { GlossaryManager } from './GlossaryManager';
+import { useViewerDictionary } from './useViewerDictionary';
 
 export const SELECTED_PRINTER_STORAGE_KEY = 'pdfcraft-selected-printer';
 
@@ -34,7 +34,6 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
     const [autoCopyEnabled, setAutoCopyEnabled] = useState(true);
     const [copiedNotify, setCopiedNotify] = useState<string | null>(null);
     const [dictionaryEnabled, setDictionaryEnabled] = useState(true);
-    const [lookup, setLookup] = useState<{ word: string; anchor: DictionaryAnchor } | null>(null);
     const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
 
     // Native printing state
@@ -76,28 +75,7 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
     }, [syncSelection]);
 
     // Look up the double-clicked word inside the viewer iframe
-    const dictionaryEnabledRef = useRef(dictionaryEnabled);
-    dictionaryEnabledRef.current = dictionaryEnabled;
-
-    const handleViewerDoubleClick = useCallback((win: Window) => {
-        if (!dictionaryEnabledRef.current) return;
-        const sel = win.getSelection();
-        if (!sel || sel.rangeCount === 0) return;
-        const word = normalizeLookupWord(sel.toString());
-        const iframeRect = iframeRef.current?.getBoundingClientRect();
-        if (!word || !iframeRect) return;
-        const rect = sel.getRangeAt(0).getBoundingClientRect();
-        setLookup({
-            word,
-            anchor: {
-                left: iframeRect.left + rect.left,
-                top: iframeRect.top + rect.top,
-                bottom: iframeRect.top + rect.bottom,
-            },
-        });
-    }, []);
-
-    const closeLookup = useCallback(() => setLookup(null), []);
+    const { lookup, closeLookup } = useViewerDictionary(iframeRef, dictionaryEnabled, pdfUrl);
 
     // Attach selection listener into iframe contentDocument once loaded
     const handleIframeLoad = useCallback(() => {
@@ -108,16 +86,9 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
                 const win = iframe.contentWindow;
                 doc.addEventListener('mouseup', () => syncSelection(win));
                 doc.addEventListener('touchend', () => syncSelection(win));
-                doc.addEventListener('dblclick', () => handleViewerDoubleClick(win));
-                // Clicks and scrolling inside the viewer do not reach the host document
-                doc.addEventListener('mousedown', closeLookup);
-                doc.addEventListener('keydown', (event) => {
-                    if (event.key === 'Escape') closeLookup();
-                });
-                doc.getElementById('viewerContainer')?.addEventListener('scroll', closeLookup, { passive: true });
             }
         } catch {}
-    }, [syncSelection, handleViewerDoubleClick, closeLookup]);
+    }, [syncSelection]);
 
     const handleFilesSelected = useCallback((files: File[]) => {
         if (files.length > 0) {
@@ -287,7 +258,7 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
         setPdfUrl(null);
         setError(null);
         setCopiedNotify(null);
-        setLookup(null);
+        closeLookup();
         setIsPrintModalOpen(false);
         setPrintStatus(null);
     }, [pdfUrl]);
@@ -357,7 +328,7 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
                                     size="sm"
                                     onClick={() => {
                                         setDictionaryEnabled(!dictionaryEnabled);
-                                        setLookup(null);
+                                        closeLookup();
                                     }}
                                     className="text-xs h-7 gap-1"
                                     title={dictionaryEnabled ? tTools('pdfReader.dictionary.toggleOn') : tTools('pdfReader.dictionary.toggleOff')}
@@ -370,7 +341,7 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => {
-                                        setLookup(null);
+                                        closeLookup();
                                         setIsGlossaryOpen(true);
                                     }}
                                     className="text-xs h-7 gap-1"
