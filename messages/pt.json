@@ -3139,7 +3139,26 @@
     },
     "pdfReader": {
       "uploadLabel": "Abrir arquivo PDF",
-      "uploadDescription": "Abrir um arquivo PDF para ler e visualizar."
+      "uploadDescription": "Abrir um arquivo PDF para ler e visualizar.",
+      "autoCopy": "Copiar seleção automaticamente",
+      "autoCopyOn": "O texto selecionado é copiado para a área de transferência (ligado)",
+      "autoCopyOff": "O texto selecionado é copiado para a área de transferência (desligado)",
+      "copiedToast": "Copiado para a área de transferência:",
+      "print": "Imprimir (Ctrl+P)",
+      "download": "Baixar",
+      "close": "Fechar",
+      "dictionary": {
+        "toggle": "Dicionário",
+        "toggleOn": "Clique duas vezes numa palavra para ver o significado (ligado)",
+        "toggleOff": "Clique duas vezes numa palavra para ver o significado (desligado)",
+        "title": "Significado de {word}",
+        "loading": "Buscando...",
+        "notFound": "Significado não encontrado no Wikcionário. Tente no Dicio.",
+        "error": "Não foi possível acessar o dicionário. Verifique a conexão ou tente no Dicio.",
+        "source": "Fonte: Wikcionário",
+        "openDicio": "Abrir no Dicio",
+        "close": "Fechar"
+      }
     },
     "findAndRedact": {
       "uploadLabel": "Carregar arquivo PDF",

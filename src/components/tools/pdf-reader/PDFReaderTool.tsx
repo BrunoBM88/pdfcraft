@@ -5,10 +5,12 @@ import { useTranslations } from 'next-intl';
 import { FileUploader } from '../FileUploader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Download, X, CopyCheck, Printer, RefreshCw, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Download, X, CopyCheck, Printer, RefreshCw, CheckCircle2, AlertCircle, Loader2, BookOpen } from 'lucide-react';
 import { saveBlobFile, isTauri, getSystemPrinters, printPdfFile, type SystemPrinter } from '@/lib/tauri-bridge';
 import { Modal } from '@/components/ui';
 import { withBasePath } from '@/lib/utils/path';
+import { normalizeLookupWord } from '@/lib/dictionary';
+import { DictionaryPopup, type DictionaryAnchor } from './DictionaryPopup';
 
 export const SELECTED_PRINTER_STORAGE_KEY = 'pdfcraft-selected-printer';
 
@@ -30,6 +32,8 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
     const [error, setError] = useState<string | null>(null);
     const [autoCopyEnabled, setAutoCopyEnabled] = useState(true);
     const [copiedNotify, setCopiedNotify] = useState<string | null>(null);
+    const [dictionaryEnabled, setDictionaryEnabled] = useState(true);
+    const [lookup, setLookup] = useState<{ word: string; anchor: DictionaryAnchor } | null>(null);
 
     // Native printing state
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
@@ -69,6 +73,30 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
         return () => document.removeEventListener('mouseup', handleMouseUp);
     }, [syncSelection]);
 
+    // Look up the double-clicked word inside the viewer iframe
+    const dictionaryEnabledRef = useRef(dictionaryEnabled);
+    dictionaryEnabledRef.current = dictionaryEnabled;
+
+    const handleViewerDoubleClick = useCallback((win: Window) => {
+        if (!dictionaryEnabledRef.current) return;
+        const sel = win.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const word = normalizeLookupWord(sel.toString());
+        const iframeRect = iframeRef.current?.getBoundingClientRect();
+        if (!word || !iframeRect) return;
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        setLookup({
+            word,
+            anchor: {
+                left: iframeRect.left + rect.left,
+                top: iframeRect.top + rect.top,
+                bottom: iframeRect.top + rect.bottom,
+            },
+        });
+    }, []);
+
+    const closeLookup = useCallback(() => setLookup(null), []);
+
     // Attach selection listener into iframe contentDocument once loaded
     const handleIframeLoad = useCallback(() => {
         try {
@@ -78,9 +106,16 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
                 const win = iframe.contentWindow;
                 doc.addEventListener('mouseup', () => syncSelection(win));
                 doc.addEventListener('touchend', () => syncSelection(win));
+                doc.addEventListener('dblclick', () => handleViewerDoubleClick(win));
+                // Clicks and scrolling inside the viewer do not reach the host document
+                doc.addEventListener('mousedown', closeLookup);
+                doc.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') closeLookup();
+                });
+                doc.getElementById('viewerContainer')?.addEventListener('scroll', closeLookup, { passive: true });
             }
         } catch {}
-    }, [syncSelection]);
+    }, [syncSelection, handleViewerDoubleClick, closeLookup]);
 
     const handleFilesSelected = useCallback((files: File[]) => {
         if (files.length > 0) {
@@ -250,6 +285,7 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
         setPdfUrl(null);
         setError(null);
         setCopiedNotify(null);
+        setLookup(null);
         setIsPrintModalOpen(false);
         setPrintStatus(null);
     }, [pdfUrl]);
@@ -296,24 +332,39 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
                                     size="sm"
                                     onClick={() => setAutoCopyEnabled(!autoCopyEnabled)}
                                     className="text-xs h-7 gap-1"
-                                    title={autoCopyEnabled ? "划选自动存入剪贴板 (已开启)" : "划选自动存入剪贴板 (已关闭)"}
+                                    title={autoCopyEnabled ? tTools('pdfReader.autoCopyOn') : tTools('pdfReader.autoCopyOff')}
                                 >
                                     <CopyCheck className={`w-3.5 h-3.5 ${autoCopyEnabled ? 'text-primary' : 'text-muted-foreground'}`} />
-                                    <span className="hidden sm:inline">选中文本自动复制</span>
+                                    <span className="hidden sm:inline">{tTools('pdfReader.autoCopy')}</span>
+                                </Button>
+
+                                {/* Double-click a word to look it up in the dictionary */}
+                                <Button
+                                    variant={dictionaryEnabled ? "secondary" : "ghost"}
+                                    size="sm"
+                                    onClick={() => {
+                                        setDictionaryEnabled(!dictionaryEnabled);
+                                        setLookup(null);
+                                    }}
+                                    className="text-xs h-7 gap-1"
+                                    title={dictionaryEnabled ? tTools('pdfReader.dictionary.toggleOn') : tTools('pdfReader.dictionary.toggleOff')}
+                                >
+                                    <BookOpen className={`w-3.5 h-3.5 ${dictionaryEnabled ? 'text-primary' : 'text-muted-foreground'}`} />
+                                    <span className="hidden sm:inline">{tTools('pdfReader.dictionary.toggle')}</span>
                                 </Button>
 
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={handleTriggerPrint}
-                                    title="打印 (Ctrl+P)"
+                                    title={tTools('pdfReader.print')}
                                 >
                                     <Printer className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" onClick={handleDownload} title="Download">
+                                <Button variant="ghost" size="sm" onClick={handleDownload} title={tTools('pdfReader.download')}>
                                     <Download className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" onClick={handleReset} title="Close">
+                                <Button variant="ghost" size="sm" onClick={handleReset} title={tTools('pdfReader.close')}>
                                     <X className="w-4 h-4" />
                                 </Button>
                             </div>
@@ -324,8 +375,12 @@ export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
                     {copiedNotify && (
                         <div className="fixed bottom-6 right-6 z-50 px-3 py-2 rounded-lg bg-foreground text-background text-xs shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
                             <CopyCheck className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>已自动存入剪贴板: <strong>{copiedNotify}</strong></span>
+                            <span>{tTools('pdfReader.copiedToast')} <strong>{copiedNotify}</strong></span>
                         </div>
+                    )}
+
+                    {lookup && (
+                        <DictionaryPopup word={lookup.word} anchor={lookup.anchor} onClose={closeLookup} />
                     )}
 
                     {/* PDF Viewer - Using full-featured PDF.js Viewer */}

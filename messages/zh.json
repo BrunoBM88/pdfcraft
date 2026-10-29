@@ -3107,7 +3107,12 @@
     },
     "pdfReader": {
       "uploadLabel": "打开PDF文件",
-      "uploadDescription": "打开PDF文件进行阅读和查看。"
+      "uploadDescription": "打开PDF文件进行阅读和查看。",
+      "autoCopy": "选中文本自动复制",
+      "autoCopyOn": "划选自动存入剪贴板 (已开启)",
+      "autoCopyOff": "划选自动存入剪贴板 (已关闭)",
+      "copiedToast": "已自动存入剪贴板:",
+      "print": "打印 (Ctrl+P)"
     },
     "findAndRedact": {
       "uploadLabel": "上传PDF文件",

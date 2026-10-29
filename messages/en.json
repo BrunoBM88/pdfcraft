@@ -3142,7 +3142,26 @@
     },
     "pdfReader": {
       "uploadLabel": "Open PDF File",
-      "uploadDescription": "Open a PDF file to read and view."
+      "uploadDescription": "Open a PDF file to read and view.",
+      "autoCopy": "Auto-copy selection",
+      "autoCopyOn": "Selected text is copied to the clipboard (on)",
+      "autoCopyOff": "Selected text is copied to the clipboard (off)",
+      "copiedToast": "Copied to clipboard:",
+      "print": "Print (Ctrl+P)",
+      "download": "Download",
+      "close": "Close",
+      "dictionary": {
+        "toggle": "Dictionary",
+        "toggleOn": "Double-click a word to look it up (on)",
+        "toggleOff": "Double-click a word to look it up (off)",
+        "title": "Definition of {word}",
+        "loading": "Looking up...",
+        "notFound": "No definition found in Wiktionary. Try Dicio.",
+        "error": "Could not reach the dictionary. Check your connection or try Dicio.",
+        "source": "Source: Wiktionary",
+        "openDicio": "Open in Dicio",
+        "close": "Close"
+      }
     },
     "findAndRedact": {
       "uploadLabel": "Upload PDF File",
